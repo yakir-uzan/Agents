@@ -14,7 +14,6 @@ namespace Agents.DAL
         {
             _conn = new MySqlConnection(connStr);
             _conn.Open();
-            Console.WriteLine("Connection success");
         }
 
         //הוספת סוכן
@@ -38,26 +37,55 @@ namespace Agents.DAL
 
             while (reader.Read())
             {
-                int id = reader.GetInt32(0);
-                string codeName = reader.GetString(1);
-                string realName = reader.GetString(2);
-                string location = reader.GetString(3);
-                string status = reader.GetString(4);
-                int missionsCompleted = reader.GetInt32(5);
+                agents.Add(MapReaderToAgent(reader));
+            }
+            reader.Close();
+            return agents;
+        }
+        //חיפוש סוכן לפי איי-די
+        public Agent GetAgentById(int agentId)
+        {
+            Agent agent = null;
 
-                Agent agent = new Agent(id, codeName, realName, location, status, missionsCompleted);
-                agents.Add(agent);
+            string query = $"SELECT id, codeName, realName, location, status, missionsCompleted FROM agents WHERE id = {agentId}";
+            MySqlCommand cmd = new MySqlCommand(query, _conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            if (reader.Read())
+            {
+                agent = MapReaderToAgent(reader);
             }
 
             reader.Close();
 
+            return agent;
+        }
+
+
+        //חיפוש סוכן לפי שם קוד
+        public List<Agent> SearchAgentsByCode(string codename)
+        {
+            List<Agent> agents = new List<Agent>();
+
+            string query = "SELECT id, codeName, realName, location, status, missionsCompleted FROM agents WHERE codeName = '" + codename + "'";
+            MySqlCommand cmd = new MySqlCommand(query, _conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                agents.Add(MapReaderToAgent(reader));
+            }
+
+            reader.Close();
             return agents;
         }
+
+
 
         //עידכון מיקום הסוכן לפי איי-די
         public void UpdateAgentLocation(int agentId, string newLocation)
         {
-            string query = $"SELECT agents SET location = {newLocation} WHERE id = {agentId}";
+            string query = $"UPDATE agents SET location = '{newLocation}' WHERE id = {agentId}";
             MySqlCommand cmd = new MySqlCommand(query, _conn);
             cmd.ExecuteNonQuery();
             Console.WriteLine($"Agent with id {agentId} location updated to {newLocation}");
@@ -71,5 +99,23 @@ namespace Agents.DAL
             cmd.ExecuteNonQuery();
             Console.WriteLine($"Agent with id {agentId} deleted");
         }
+
+        //הדפסת סוכן
+        private Agent MapReaderToAgent(MySqlDataReader reader)
+        {
+            return new Agent
+            (
+                reader.GetInt32(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetString(3),
+                reader.GetString(4),
+                reader.GetInt32(5)
+            );
+        }
+
+
+
+
     }
 }

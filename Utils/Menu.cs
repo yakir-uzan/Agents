@@ -18,14 +18,19 @@ namespace Agents
 
             while (flag)
             {
-                Console.WriteLine("\n=== MENU ===");
+                Console.WriteLine();
+                Console.WriteLine("=== MENU ===");
                 Console.WriteLine("1. Add agant");
                 Console.WriteLine("2. Show all agents");
                 Console.WriteLine("3. Delete agent");
-                Console.WriteLine("4. Exit");
-                Console.Write("Your choise (1-4): ");
+                Console.WriteLine("4. Search Agents By Code Name");
+                Console.WriteLine("5. Update Agent Location");
+                Console.WriteLine("6. Exit");
+                Console.WriteLine("Your choise (1-5): ");
+                Console.WriteLine(" ");
 
                 string choise = Console.ReadLine();
+                Console.WriteLine(" ");
 
                 switch (choise)
                 {
@@ -44,14 +49,20 @@ namespace Agents
 
                         Console.Write("missions Completed: ");
                         int missionsCompleted = int.Parse(Console.ReadLine());
+                        //הפעלת פונקציית אד אייג'נט
+                        Agent newAgent = new Agent(0, codeName, realName, location, status, missionsCompleted);
+                        agentDAL.AddAgent(newAgent);
+                        Console.WriteLine("Agent added successfully!");
+                        Console.WriteLine(" ");
                         break;
 
                     case "2":
                         List<Agent> agentList = agentDAL.GetAllAgents();
                         foreach (var agent in agentList)
                         {
-                            Console.WriteLine($"ID: {agent.Id}, Agent: {agent.CodeName}, Real Name: {agent.RealName}, Location: {agent.Location}, missionsCompleted: {agent.MissionsCompleted}");
+                            Console.WriteLine($"ID: {agent.Id}, Code Name: {agent.CodeName}, Real Name: {agent.RealName}, Location: {agent.Location}, missions Completed: {agent.MissionsCompleted}.");
                         }
+                        Console.WriteLine(" ");
                         break;
 
                     case "3":
@@ -59,9 +70,32 @@ namespace Agents
                         int idToDelete = int.Parse(Console.ReadLine());
                         agentDAL.DeleteAgent(idToDelete);
                         Console.WriteLine("The agent was successfully deleted!");
+                        Console.WriteLine(" ");
                         break;
 
                     case "4":
+                        Console.WriteLine("Enter code name to search: ");
+                        string codeNameToSearch = Console.ReadLine();
+                        List<Agent> searchResults = agentDAL.SearchAgentsByCode(codeNameToSearch);
+
+                        foreach (var agent in searchResults)
+                        {
+                            Console.WriteLine($"ID: {agent.Id}, Agent: {agent.CodeName}, Real Name: {agent.RealName}, Location: {agent.Location}, Status: {agent.Status}, Missions Completed: {agent.MissionsCompleted}");
+                        }
+                        break;
+
+                    case "5":
+                        Console.Write("Enter the agent ID to update location: ");
+                        int idToUpdate = int.Parse(Console.ReadLine());
+
+                        Console.Write("Enter new location: ");
+                        string newLocation = Console.ReadLine();
+
+                        agentDAL.UpdateAgentLocation(idToUpdate, newLocation);
+                        break;
+
+
+                    case "6":
                         flag = false;
                         Console.WriteLine("GoodByeeee...");
                         break;
